@@ -7,21 +7,9 @@ NOTES: Want to think about having turtles that start out "excited" - fast moving
 """
 
 
-import tkinter
+
 import numpy as np
 import turtle as t
-import curses as c
-
-NUM_TURTLE = 0
-
-def chooseState(state):
-
-    transition_matrix = {"A" : {"A" : 0.1, "B" : 0.4, "C" : 0.5 },
-                         "B" : {"A" : 0.4, "B" : 0.3, "C" : 0.3 },
-                         "C" : {"A" : 0.1, "B" : 0.2, "C" : 0.7 }
-                         }
-
-    return np.random.choice(list(transition_matrix[state].keys()), 1, list(transition_matrix[state].values()))[0]
 
 
 def roadLessTurtled():
@@ -60,64 +48,8 @@ def roadLessTurtled():
         turt.hideturtle()
         
 
-
-
-class HyperTurtle:
-
-    state = "A"
-
-    def __init__(self, x, y):
-
-        global NUM_TURTLE
-
-        NUM_TURTLE += 1
-
-        print("Running init..")
-
-        turt = t.Turtle()
-        turt.penup()
-
-        print("Made new turtle...")
-
-        turt.goto(x + NUM_TURTLE, y - NUM_TURTLE)
-        turt.pendown()
-
-        for num in range(100 - NUM_TURTLE):
-
-            turt.speed(100 - num + 5 * NUM_TURTLE)
-            turt.forward(100 - NUM_TURTLE)
-
-            new_state = chooseState(self.state)
-
-            if new_state == "A":
-                turt.color("red")
-                turt.right(NUM_TURTLE * 15)
-            elif new_state == "B":
-                turt.color("blue")
-                turt.left(NUM_TURTLE * 15)
-            else:
-                turt.color("green")
-                turt.left(NUM_TURTLE * 180)
-            
-            self.state = new_state
-        
-        NUM_TURTLE -= 1
-        turt.hideturtle()
-
-def newTurt(x, y):
-    
-    newguy = t.Turtle()
-
-    newguy.goto(x, y)
-
 def main():
 
-    #print(chooseState("A"))
-
-
-    #turtle = t.Turtle()
-    #t.onscreenclick(HyperTurtle)
-    #turtle.forward(100)
     roadLessTurtled()
     t.done()
     t.mainloop()
