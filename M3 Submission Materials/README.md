@@ -23,5 +23,17 @@ and dwell on where they might have lead. In particular, I think about making cho
 >
 >Then took the other, as just as fair,  
 >And having perhaps the better claim,  
->Because it was grassy and wanted wear;  
+>Because it was grassy and wanted wear  
+
+With "The Road Less Turtled," I wanted to capture the notion of feeling more likely to take a given path, simply because the other alternative has been far more frequently traveled. I also wanted to visually represent uncertainty in a demonstrable way, and I wanted the output of the program to vary with some controllable level of uncertainty.  
+
+***  
+
+## Overall Structure and Challenges 
+One of the key challenges in implementing "The Road Less Turtled" was my 
+lack of knowledge surrounding the Markov Chain (MC). One of my chief goals was to finish the project with a more comprehensive grasp of the Markov structure, and to learn how to manipulate it to help achieve what I wanted to achieve. To accomplish the effect of "deciding" between paths to take, I decided on using a 9th order Markov chain, where the previous 8 states influence the current state. Each "decision" represents a choice for the turtle: whether to turn right or left, and continue forward by a constant amount before deciding again. My goal was to represent a series of decisions that resets after the turtle selects "the road less travelled;" as the turtle takes the road more frequently travelled (represented by a right turn), it becomes more likely to divert, and take the road less travelled (represented by a left turn). Upon taking the road less travelled, the cycle restarts, with the turtle becoming more likely to return to the road frequently travelled.  
+
+Representing this structure in a MC was the first challenge I encountered. I was unsure at first how to represent a MC in which only certain outcomes could proceed from a given state. I decided to represent each consecutive right turn as an integer: 1 indicated one right turn, 2 indicated 2 consecutive turns, 3 three turns, and so on until 9. The MC needed to reflect the reality that one cannot jump from 3 consecutive turns to 9, or from 8 to 4, in the course of one turn. 
+
+
 
