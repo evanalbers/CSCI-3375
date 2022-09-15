@@ -17,11 +17,11 @@ and dwell on where they might have lead. In particular, I think about making cho
 
 > Two roads diverged in a yellow wood,  
 > And sorry I could not travel both  
-> And be one traveler, long I stood
-> And looked down one as far as I could
+> And be one traveler, long I stood  
+> And looked down one as far as I could  
 > To where it bent in the undergrowth;
 >
->Then took the other, as just as fair,
->And having perhaps the better claim,
->Because it was grassy and wanted wear;
+>Then took the other, as just as fair,  
+>And having perhaps the better claim,  
+>Because it was grassy and wanted wear;  
 
