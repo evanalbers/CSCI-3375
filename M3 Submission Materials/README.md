@@ -54,3 +54,8 @@ It should also be noted that in the examples above, a red line denotes a left tu
 ***
 ## Is it Creative?
 I am inclined to say no. I feel that to call this program creative would be akin to calling the physics that determine the distribution of Pollock's splatters creative; it doesn't quite feel right. The computer is still fundamentally a medium for the meaning that I wish to convey. In short, it doesn't feel as if any meaning is coming from the algorithm itself, it is only because I am aware of the properties it has that I confer meaning upon it. The originality present in each piece stems not from the particular piece, but the properties I selected when designing the program.
+## Where Would I Go Next?
+I think I would try to develop more sophisticated ways to parameterize the transition matrix. I think it would be interesting to be able to adjust the relative probability of specific events; for example, perhaps taking a fourth right turn in a row is almost certain, a fifth quite rare, but a sixth is also almost certain. At the moment the probabilities of successive right turns are linearly related.  
+## Sources
+
+I used the following website for Robert Frost's poem: https://www.poetryfoundation.org/poems/44272/the-road-not-taken
