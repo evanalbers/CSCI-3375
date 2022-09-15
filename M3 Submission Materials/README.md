@@ -1,9 +1,16 @@
-# *Italic* The Road Less Turtled
+# *The Road Less Turtled*
 
 * AUTHOR: Evan Albers
 * DUE DATE: 15 September 2022
 * PROJECT: M3 - The Road Less Turtled
-Horizontal Rule:
+
 ****
 
+## Setup
+The setup is fairly straightforward. To run *The Road Less Turtled*, simply open a terminal window and run a command line command of the form `python3 M3.py [x]` where x is an int greater than one. A window will pop up, and a legion of turtles will go to work. Simply quit the process when satisfied with their work.  
 
+***
+
+## Artistic Context
+One of my favorite poems is "The Road Not Taken" by Robert Frost. Especially throughout my college years, where I've made a series of decisions that will probably play out across my whole life (major, internship decisions, etc.), it is easily to think about choices not made,
+and dwell on where they might have lead. 
