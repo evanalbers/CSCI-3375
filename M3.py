@@ -11,32 +11,7 @@ NOTES: Want to think about having turtles that start out "excited" - fast moving
 
 import numpy as np
 import turtle as t
-import sys
-
-"""
-markov tuner is a function that lets the user "tune" the markov table to achieve a given desired outcome
-"""
-def markov_tuner(state, additional_chance, matrix):
-
-    for key in list(matrix.keys()):
-
-        current_prob = matrix[key][state]
-        if current_prob + additional_chance > 1:
-
-            for element in matrix[key]:
-                if element == state:
-                    matrix[key][state] = 1
-                else:
-                    matrix[key][element] = 0
-        else: 
-            matrix[key][state] = matrix[key][state] + additional_chance
-            for element in matrix[key]:
-                if element != state:
-                    matrix[key][element] = (1 - matrix[key][state]) / (matrix[key].size() - 1)
-            
-
-    
-
+import sys    
 
 def roadLessTurtled(tuning_coeff):
 
