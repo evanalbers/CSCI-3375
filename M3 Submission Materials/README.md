@@ -37,8 +37,11 @@ Representing this structure in a MC was the first challenge I encountered. I was
 
 Incorporating a parameter into the MC took a little bit of thinking to achieve the effect I wanted. I wanted the parameter to be a measure of "order." The greater the parameter, the less likely the turtles were to deviate from the road frequently turtled. I finally settled on a way to work it in, with some minor additions to make the program robust to user error. If anything is submitted other than an int greater than one, it sets the tuning coefficient to one. The parameter generally works as intended. As the tuning coefficient increases, the sporadic nature of the artwork decreases, and if it is sufficiently large, the drawing converges on a single circle with little or no derivation. This effect can be observed in the example outputs provided below:  
 
-T = 1:  
+***  
 ![](T1.png)
-
+![](T5.png)
+![](T10.png)
+![](T25.png)
+![](T50.png)
 
 
