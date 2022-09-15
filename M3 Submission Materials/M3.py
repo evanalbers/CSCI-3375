@@ -15,9 +15,11 @@ import sys
 
 def roadLessTurtled(tuning_coeff):
 
-
-    if type(tuning_coeff) != int or tuning_coeff < 1:
+    if type(tuning_coeff) == float and tuning_coeff < 1:
         tuning_coeff = 1
+    else: 
+        tuning_coeff = int(tuning_coeff)
+
 
     prob = 0.1 / int(tuning_coeff)
 
