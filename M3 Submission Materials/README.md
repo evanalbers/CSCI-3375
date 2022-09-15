@@ -17,7 +17,6 @@ and dwell on where they might have lead. In particular, I think about making cho
 
 > Two roads diverged in a yellow wood,  
 
->
 > And sorry I could not travel both
 > And be one traveler, long I stood
 > And looked down one as far as I could
