@@ -51,4 +51,6 @@ Incorporating a parameter into the MC took a little bit of thinking to achieve t
 
 It should also be noted that in the examples above, a red line denotes a left turn (the less likely option), while black lines denote right turns.  
 
-
+***
+## Is it Creative?
+I am inclined to say no. I feel that to call this program creative would be akin to calling the physics that determine the distribution of Pollock's splatters creative; it doesn't quite feel right. The computer is still fundamentally a medium for the meaning that I wish to convey. In short, it doesn't feel as if any meaning is coming from the algorithm itself, it is only because I am aware of the properties it has that I confer meaning upon it. The originality present in each piece stems not from the particular piece, but the properties I selected when designing the program.
