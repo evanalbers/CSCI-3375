@@ -87,4 +87,28 @@ def populateTerminalSymbols():
     with open("term_map.json", "w") as f:
         json.dump(TERMINAL_MAP, f)
 
+def add_human_lim(filename):
+
+    human_lims = []
+
+    mega_dict = {}
+
+    with open(filename, "r") as f:
+        human_data = json.load(f)
+
+
+
+        for entry in human_data:
+            if entry['is_limerick']:
+                human_lims.append(entry['limerick'])
+
+    with open("lim_data.json", "r") as f:
+        mega_dict = json.load(f)
+    
+    print(human_lims)
+
+    with open("lim_data.json", "w") as f:
+        mega_dict['1'] = human_lims
+        json.dump(mega_dict, f)
+
 

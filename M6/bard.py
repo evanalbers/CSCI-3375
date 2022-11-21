@@ -14,10 +14,9 @@ inspiring subject and their characteristic
 """
 import numpy as np
 import pronouncing as p
-import requests
-import nltk
 from nltk.corpus import wordnet as wn
 import bard_db as db
+import json
 
 MARKOV_MATRICIES = {}
 
@@ -155,14 +154,10 @@ def generateLine(tag, num_feet, syllables, rhyme=False):
 
         remaining_meter, line = generateLine(next_tag, num_feet, syllables-1, rhyme)
 
-        # if remaining_meter == False:
-        #     return False, False
-
         while line == False:
 
-            if len(weights) == 1:
-                print('returning')
-                print(remaining_meter, line)
+            if len(weights) == 8:
+
                 return remaining_meter, line
 
             weights, tags = readjustWeights(next_tag, tags, weights)
@@ -178,41 +173,40 @@ def genLimerick():
 
     line_one = generateLine('NOUN', 3, 9)[1]
 
+    if line_one == False:
+        return False
+
     print(line_one)
 
     line_two = generateLine('NOUN', 3, 9, line_one.split()[-1])[1]
+
+    if line_two == False:
+        return False
 
     print(line_two)
 
     line_three = generateLine('NOUN', 2, 6)[1]
 
+    if line_three == False:
+        return False
+
     print(line_three)
 
     line_four = generateLine('NOUN', 2, 6, line_three.split()[-1])[1]
 
+    if line_four == False:
+        return False
+
     print(line_four)
 
     line_five = generateLine('NOUN', 3, 9, line_one.split()[-1])[1]
+
+    if line_five == False:
+        return False
     
     print(line_five)
 
-    # while line_two == (False, False):
-    #     line_two = generateLine('NOUN', 3, 9, line_one[1].split()[-1])
-
-
-    # line_two = generateLine('NOUN', 3, 9, line_one[1].split()[-1])[1]
-
-    # line_three = generateLine("NOUN", 2, 6)[1]
-
-    # line_four = generateLine("NOUN", 2, 6, line_three[1].split()[-1])[1]
-
-    # line_five = generateLine('NOUN', 3, 9, line_one[1].split()[-1])[1]
-
-
-
-
-
-    # return line_one + '\n' + line_two + '\n' + line_three + '\n' + line_four + '\n' + line_five
+    return line_one + '\n' + line_two + '\n' + line_three + '\n' + line_four + '\n' + line_five
 
 
 
@@ -264,29 +258,44 @@ def genLimerick():
 
 #GENERAL IDEA: bard generates its own CFG, with a series of POS as an input from Spacy 
 #then optimize markov weights for each POS, until we have a grammar it's happy with bassed on the classifier 
-def getInspo():
-    word = input("What would you like to hear about? : ")
-    return word.strip().lower()
 
-def saveToFile(text, title):
 
-    with open(title + ".txt", 'w') as f:
-        f.writelines(text)
+
+""" used to save some given text to json file"""
+def saveToFile(lim_list):
+
+    mega_dict = {}
+
+    mega_dict['0'] = lim_list
+
+    with open("lim_data.json", 'w') as f:
+        json.dump(mega_dict, f)
+
+""" used to generate n limericks from bard"""
+def genData(n):
+
+    lim_list = []
+
+    for num in range(n):
+        print("LIMERICK #" + str(num))
+        lim = genLimerick()
+        if lim != False:
+            lim_list.append(lim)
+    
+    saveToFile(lim_list)
+
 
 
 def main():
 
     db.populateTerminalSymbols()
 
-    #print(db.TAG_LIST)
-
     initializeMarkovMatrices()
 
-    remaining, line = generateLine('NOUN', 3, 9)
 
-   # print(line)
+    #genData(50)
 
-    genLimerick()
+    db.add_human_lim("limerick_dataset_oedilf_v3.json")
     return 0
 
 
