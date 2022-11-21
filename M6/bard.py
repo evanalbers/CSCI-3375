@@ -56,18 +56,29 @@ def initializeMarkovMatrices():
 """ function to choose a terminal symbol from list of terminal symbols
     currently just chooses a random one, want to add concept net support for considering weights"""
 
-def chooseTerminal(tag, rhyme_scheme): 
+def chooseTerminal(tag, rhyme_scheme, rhyme_word=False): 
 
     terminals = db.TERMINAL_MAP[tag]
 
     possible_words = []
+
+    rhyming_words = []
 
     for term in terminals:
         possible_pronun = p.phones_for_word(term)
         for pronun in possible_pronun:
             if rhyme_scheme.endswith(p.stresses(pronun)) and term not in possible_words:
                 possible_words.append((term, p.stresses(pronun)))
-    
+
+    if rhyme_word != False:
+        for word in possible_words:
+            if word[0] in p.rhymes(rhyme_word):
+                rhyming_words.append(word)
+        possible_words = rhyming_words
+
+    if len(possible_words) == 0:
+        return (False, False)
+
     index = np.random.choice(len(possible_words))
     
     choice = possible_words[index]
@@ -76,14 +87,14 @@ def chooseTerminal(tag, rhyme_scheme):
 
 
 """ simplfying base case for generateLine recursion """
-def glBaseCase(tag, num_feet):
+def glBaseCase(tag, num_feet, rhyme_word):
 
     if num_feet == 3:
         rhyme_scheme = '001001001'
     else: 
         rhyme_scheme = '001001'
         
-    line, remaining = chooseTerminal(tag, rhyme_scheme)
+    line, remaining = chooseTerminal(tag, rhyme_scheme, rhyme_word)
 
     return remaining, line
 
@@ -93,8 +104,11 @@ def glPostRecursion(remaining_meter, line, tag):
     if remaining_meter == "":
         return remaining_meter, line
     else:
-    
+        
         new_info = chooseTerminal(tag, remaining_meter)
+
+        if not new_info[0]:
+            return new_info
 
         new_line = new_info[0] + " "  + line
 
@@ -102,38 +116,103 @@ def glPostRecursion(remaining_meter, line, tag):
 
         return new_remaining, new_line
 
+def readjustWeights(tag, tag_list, weights):
+
+    add = weights[tag_list.index(tag)] / (len(weights)-1)
+
+    weights.pop(tag_list.index(tag))
+
+    for num in range(len(weights)):
+        weights[num] += add
+
+    extra = 1 - sum(weights)
+
+    weights[np.random.choice(len(weights))] += extra
+    
+    tag_list.remove(tag)
+
+    return weights, tag_list
+
+
 """ markov descent parser that generates sentence with given stress scheme """    
-def generateLine(tag, num_feet, syllables):
+def generateLine(tag, num_feet, syllables, rhyme=False):
 
     global MARKOV_MATRICIES
 
-    weights = MARKOV_MATRICIES[db.TAG_LIST.index(tag)]
+    tags = db.TAG_LIST[:]
 
-    index = np.random.choice(len(db.TAG_LIST), p=weights)
+    weights = MARKOV_MATRICIES[tags.index(tag)][:]
 
-    next_tag = db.TAG_LIST[index]
+    index = np.random.choice(len(tags), p=weights)
 
-    print(next_tag)
+    next_tag = tags[index]
 
     if syllables == 0:
 
-        return glBaseCase(tag, num_feet)
+        return glBaseCase(tag, num_feet, rhyme)
 
     else: 
 
-        remaining_meter, line = generateLine(next_tag, num_feet, syllables-1)
+        remaining_meter, line = generateLine(next_tag, num_feet, syllables-1, rhyme)
+
+        # if remaining_meter == False:
+        #     return False, False
+
+        while line == False:
+
+            if len(weights) == 1:
+                print('returning')
+                print(remaining_meter, line)
+                return remaining_meter, line
+
+            weights, tags = readjustWeights(next_tag, tags, weights)
+            
+            index = np.random.choice(len(tags), p=weights)
+            next_tag = tags[index]
+
+            remaining_meter, line = generateLine(next_tag, num_feet, syllables-1, rhyme)
         
         return glPostRecursion(remaining_meter, line, tag)
 
 def genLimerick():
-    limerick = generateLine('NOUN', 3, 9)[1] + "\n" + \
-               generateLine('NOUN', 3, 9)[1] + "\n" + \
-               generateLine('NOUN', 2, 6)[1] + '\n' + \
-               generateLine('NOUN', 2, 6)[1] + '\n' + \
-               generateLine('NOUN', 3, 9)[1]
 
-    return limerick
+    line_one = generateLine('NOUN', 3, 9)[1]
 
+    print(line_one)
+
+    line_two = generateLine('NOUN', 3, 9, line_one.split()[-1])[1]
+
+    print(line_two)
+
+    line_three = generateLine('NOUN', 2, 6)[1]
+
+    print(line_three)
+
+    line_four = generateLine('NOUN', 2, 6, line_three.split()[-1])[1]
+
+    print(line_four)
+
+    line_five = generateLine('NOUN', 3, 9, line_one.split()[-1])[1]
+    
+    print(line_five)
+
+    # while line_two == (False, False):
+    #     line_two = generateLine('NOUN', 3, 9, line_one[1].split()[-1])
+
+
+    # line_two = generateLine('NOUN', 3, 9, line_one[1].split()[-1])[1]
+
+    # line_three = generateLine("NOUN", 2, 6)[1]
+
+    # line_four = generateLine("NOUN", 2, 6, line_three[1].split()[-1])[1]
+
+    # line_five = generateLine('NOUN', 3, 9, line_one[1].split()[-1])[1]
+
+
+
+
+
+    # return line_one + '\n' + line_two + '\n' + line_three + '\n' + line_four + '\n' + line_five
 
 
 
@@ -199,15 +278,15 @@ def main():
 
     db.populateTerminalSymbols()
 
-    print(db.TAG_LIST)
+    #print(db.TAG_LIST)
 
     initializeMarkovMatrices()
 
     remaining, line = generateLine('NOUN', 3, 9)
 
-    print(line)
+   # print(line)
 
-    print(genLimerick())
+    genLimerick()
     return 0
 
 
