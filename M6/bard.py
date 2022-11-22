@@ -17,6 +17,13 @@ import pronouncing as p
 from nltk.corpus import wordnet as wn
 import bard_db as db
 import json
+from nltk.stem.lancaster import LancasterStemmer
+from nltk.tokenize import word_tokenize
+import string
+import bard_trainer as bt
+import os
+import gtts as tts
+from playsound import playsound
 
 MARKOV_MATRICIES = {}
 
@@ -39,9 +46,17 @@ MARKOV_MATRICIES = {}
 
 
 """ initializing all possible terms in the CFG to equal prob """
-def initializeMarkovMatrices():
+def initializeMarkovMatrices(key=0, filename="", givenMM={}):
 
     global MARKOV_MATRICIES
+
+    if filename != "":
+        with open(filename, "r") as f:
+            MARKOV_MATRICES = json.load(f)[key]
+        return
+
+    if givenMM != {}:
+        MARKOV_MATRICES = givenMM
 
     starting_values = []
 
@@ -57,7 +72,7 @@ def initializeMarkovMatrices():
 
 def chooseTerminal(tag, rhyme_scheme, rhyme_word=False): 
 
-    terminals = db.TERMINAL_MAP[tag]
+    terminals = db.TERMINAL_MAP[tag][:]
 
     possible_words = []
 
@@ -156,7 +171,7 @@ def generateLine(tag, num_feet, syllables, rhyme=False):
 
         while line == False:
 
-            if len(weights) == 8:
+            if len(weights) == len(db.TAG_LIST) - 1:
 
                 return remaining_meter, line
 
@@ -171,79 +186,43 @@ def generateLine(tag, num_feet, syllables, rhyme=False):
 
 def genLimerick():
 
-    line_one = generateLine('NOUN', 3, 9)[1]
+    line_one = generateLine(np.random.choice(db.TAG_LIST), 3, 9)[1]
 
     if line_one == False:
         return False
 
-    print(line_one)
+    #print(line_one)
 
-    line_two = generateLine('NOUN', 3, 9, line_one.split()[-1])[1]
+    line_two = generateLine(np.random.choice(db.TAG_LIST), 3, 9, line_one.split()[-1])[1]
 
     if line_two == False:
         return False
 
-    print(line_two)
+    #print(line_two)
 
-    line_three = generateLine('NOUN', 2, 6)[1]
+    line_three = generateLine(np.random.choice(db.TAG_LIST), 2, 6)[1]
 
     if line_three == False:
         return False
 
-    print(line_three)
+    #print(line_three)
 
-    line_four = generateLine('NOUN', 2, 6, line_three.split()[-1])[1]
+    line_four = generateLine(np.random.choice(db.TAG_LIST), 2, 6, line_three.split()[-1])[1]
 
     if line_four == False:
         return False
 
-    print(line_four)
+    #print(line_four)
 
-    line_five = generateLine('NOUN', 3, 9, line_one.split()[-1])[1]
+    line_five = generateLine(np.random.choice(db.TAG_LIST), 3, 9, line_one.split()[-1])[1]
 
     if line_five == False:
         return False
     
-    print(line_five)
+    #print(line_five)
 
     return line_one + '\n' + line_two + '\n' + line_three + '\n' + line_four + '\n' + line_five
 
-
-
-
-
-
-
-
-# """ Finding verbs related to the inspiring word """
-# def findVerbs(word):
-    
-#     word_data = requests.get('http://api.conceptnet.io/c/en/' + word).json()
-
-#     verb = []
-
-#     for e in word_data['edges']:
-#         if e['rel']['label'] == ("CapableOf" or "UsedFor" or "Causes"):
-#             verb.append(e['end']['label'])
-
-#     return verb
-
-
-
-# """
-# Find words related to a given word
-# """
-# def searchRelations(word):
-
-#     word_data = requests.get('http://api.conceptnet.io/related/c/en/' + word + "?filter=/c/en").json()
-
-#     potential_words = []
-
-#     for related in word_data['related']:
-#         potential_words.append(related["@id"][6:])
-        
-
-#     return potential_words
 
 """A function that verifies that the given line has "feet" number of anapestic meters
 
@@ -264,7 +243,10 @@ def genLimerick():
 """ used to save some given text to json file"""
 def saveToFile(lim_list):
 
-    mega_dict = {}
+    with open("lim_data.json", 'r') as f:
+
+        mega_dict = json.load(f)
+    
 
     mega_dict['0'] = lim_list
 
@@ -272,8 +254,11 @@ def saveToFile(lim_list):
         json.dump(mega_dict, f)
 
 """ used to generate n limericks from bard"""
-def genData(n):
+def genData(n, givenMM=''):
 
+    if givenMM != '':
+        MARKOV_MATRICIES = givenMM
+    
     lim_list = []
 
     for num in range(n):
@@ -285,17 +270,59 @@ def genData(n):
     saveToFile(lim_list)
 
 
+""" train the model on some given fileset """
+def trainModel(filename): 
+
+    stemmer = LancasterStemmer()
+
+    raw = db.get_raw_training_data("lim_data.json")
+    words, classes, documents = db.organize_raw_training_data(raw, stemmer)
+    training_data, output = db.create_training_data(words, classes, documents)
+
+    # Comment this out if you have already trained once and don't want to re-train.
+    bt.start_training(words, classes, training_data, output)
+
+"""bard demo function"""
+
+def bard_demo():
+    with open("survivors.json", 'r') as f:
+        survivors = json.load(f)
+    top = max(list(survivors.keys()))
+    bestMM = survivors[top]
+
+    initializeMarkovMatrices(givenMM=bestMM)
+
+    with open("demo_lims.json", "r") as f:
+        lims = json.load(f)
+
+    new_lim = genLimerick()
+
+    spch = tts.gTTS(text=new_lim, lang='en')
+    spch.save("demo.mp3")
+    playsound("demo.mp3")
+    
+    print(new_lim)
+
+    if '0' not in lims:
+        lims['0'] = []
+        
+    lims['0'].append(new_lim)
+
+    with open("demo_lims.json", "w") as f:
+        json.dump(lims, f)
+
+
+
+
 
 def main():
 
-    db.populateTerminalSymbols()
+    db.popTermFromHuman()
 
-    initializeMarkovMatrices()
+    bard_demo()
 
-
-    #genData(50)
-
-    db.add_human_lim("limerick_dataset_oedilf_v3.json")
+    #print(lim)
+    
     return 0
 
 
