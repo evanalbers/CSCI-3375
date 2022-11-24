@@ -177,8 +177,6 @@ def classify(words, classes, sentence):
 
 
 def main():
-    """TODO: more instructions here..."""
-
     stemmer = LancasterStemmer()
 
     raw = db.get_raw_training_data("dialogue_data.csv")

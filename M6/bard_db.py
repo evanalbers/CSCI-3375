@@ -1,95 +1,83 @@
-
 import numpy as np
-import pronouncing as p
 import nltk
 from nltk.corpus import brown
-import requests
-import bard as b
 import json
 from os.path import exists
-from nltk.stem.lancaster import LancasterStemmer
 from nltk.tokenize import word_tokenize
 import string
 
-TAG_LIST = ['ADJ', 'ADP', 'PUNCT', 'ADV', 'AUX',
-            'SYM', 'INTJ', 'CCONJ','X', 'NOUN',
-            'DET', 'PROPN', 'NUM', 'VERB', 'PART',	
-            'PRON', 'SCONJ']
+TAG_LIST = []
 
 TERMINAL_MAP = {}
 
+def getHumanLims():
 
-
-
-""" used to traverse concept net and populate a list of words related to the one submitted """
-def CNtraverse(word, num):
-
-    if num == 0:
-        return []
-
-    word_data = requests.get('http://api.conceptnet.io/c/en/' + word).json()
-
-    related_words = []
-
-    for e in word_data['edges']:
-        related_words.append(e['end']['label'])
-        related_words += CNtraverse(e['end']['label'], num-1)
+    """gets a list of human limericks from default dataset 
     
-    return related_words
+    Parameters
+    --------
+    None
 
-def trimConceptNetData(words):
+    Returns
+    --------
+    human_lims : list
+        list of human written limericks
 
-    split_words = []
-    to_remove = []
-
-    for w in words:
-        parts = w.split()
-        #print((parts, len(parts)))
-        if len(parts) > 1:
-            to_remove.append(w)
-            for p in parts:
-                split_words.append(p)
-    
-    for w in to_remove:
-        words.remove(w)
-
-    words += split_words
-
-    return list(set(words))
-
-"""trying to see if this is issue, populates lexicon from human limericks"""
-def popTermFromHuman():
+    Notes
+    --------
+    Only used for default data set, other datasets might take other forms
+    so it is not a general function
+    """
 
     global TERMINAL_MAP
     global TAG_LIST
-
-    if exists("human_term_map.json"):
-        with open("human_term_map.json", "r") as f:
-            TERMINAL_MAP = json.load(f)
-            TAG_LIST = list(TERMINAL_MAP.keys())
-            print(TAG_LIST)
-        return
 
     #will be resetting
     TAG_LIST = []
 
     human_lims = []
 
+    #load human written lim data set
     with open("limerick_dataset_oedilf_v3.json", "r") as f:
         lims = json.load(f)
 
+    #contains some non-lim text, don't want those, get only the limericks
     for entry in lims:
         if entry['is_limerick']:
             human_lims.append(entry['limerick'])
 
- 
-    for lim in human_lims:
-        lines = lim.split('\n')
+
+    return human_lims
+
+def populateTermMap(corpus):
+
+    """ populates the TERMINAL_MAP from a given corpus
+    
+    Parameters
+    --------
+    corpus : list
+        a list of strings that represents the chosen text corpus
+
+    Returns
+    --------
+    None
+
+    Notes
+    --------
+    Corpus must be a list of strings. This can be sentences or paragraphs
+    """
+
+    #for each entry in corpus
+    for text in corpus:
+        lines = text.split('\n')
+
+        #for each line, tokenize, get pos tag
         for line in lines:
             tokens = word_tokenize(line)
             token_tags = nltk.pos_tag(tokens)
-            for t in token_tags: 
 
+            #for each tag, check if already in TMap, if not, add it
+            for t in token_tags: 
                 if t[1] in TERMINAL_MAP and t[0] not in TERMINAL_MAP[t[1]]:
                     print(t[0])
                     TERMINAL_MAP[t[1]].append(t[0])
@@ -99,80 +87,49 @@ def popTermFromHuman():
                     TERMINAL_MAP[t[1]].append(t[0])
                     TAG_LIST.append(t[1])
     
+    #save to file
     with open("human_term_map.json", "w") as f:
         json.dump(TERMINAL_MAP, f)
+    
 
-def populateTerminalSymbols():
+def popTermFromHuman():
+
+    """populates terminal map from human limerick database
+    
+    Parameters
+    --------
+    None
+
+    Returns
+    --------
+    None
+
+    Notes
+    --------
+    Uses the human limerick dataset as the corpus for terminal symbols, added
+    because the classifier operates on word matching to a certain extent, so 
+    simply having different words can make it difficult to fool the trainer. 
+    """
 
     global TERMINAL_MAP
     global TAG_LIST
 
-    if exists("term_map.json"):
-        with open("term_map.json", "r") as f:
+    #if it already exists, use it to avoid long load time
+    if exists("human_term_map.json"):
+        with open("human_term_map.json", "r") as f:
             TERMINAL_MAP = json.load(f)
-            TAG_LIST = list(TERMINAL_MAP.keys())
-            print(TAG_LIST)
-        return
-    
-    brown_corpus_tagged = brown.tagged_words(tagset='universal')
 
-    for tag in TAG_LIST:
-        TERMINAL_MAP[tag] = []
-    
-    for word in brown_corpus_tagged:
+            #only initialize if it isn't empty, otherwise should populate it
+            if TERMINAL_MAP != {}:
+                TAG_LIST = list(TERMINAL_MAP.keys())
+                print(TAG_LIST)
+                return
 
-        if word[1] in TAG_LIST and word[0] not in TERMINAL_MAP[word[1]]:
+    human_lims = getHumanLims()
 
-            TERMINAL_MAP[word[1]].append(word[0])
-
-    empty = [tag for tag in TERMINAL_MAP if len(TERMINAL_MAP[tag]) == 0]
-
-    for tag in empty:
-
-        TERMINAL_MAP.pop(tag)
-        TAG_LIST.remove(tag)
-
-    with open("term_map.json", "w") as f:
-        json.dump(TERMINAL_MAP, f)
-
-def add_human_lim(filename):
-
-    human_lims = []
-
-    mega_dict = {}
-
-    with open(filename, "r") as f:
-        human_data = json.load(f)
-
-        for entry in human_data:
-            if entry['is_limerick']:
-                human_lims.append(entry['limerick'])
-
-    with open("lim_data.json", "r") as f:
-        mega_dict = json.load(f)
-    
-    #print(human_lims)
-
-    with open("lim_data.json", "w") as f:
-        mega_dict['1'] = human_lims
-        json.dump(mega_dict, f)
+    populateTermMap(human_lims)
 
 
-
-"""
-Evan Albers, Sofia Hamby, Soule Toure
-CSCI 3725
-PQ4: Social Networks
-11/18/22
-
-This starter code enables our neural network training! 
-Basic helper functions to organize the dialogue data 
-
-"""
-
-
-
-    
 def get_raw_training_data(filename):
     """Open a JSON file and extract its data into a list of dictionaries.
     Parameters: 
@@ -243,7 +200,7 @@ def organize_raw_training_data(raw_training_data, stemmer):
            
     words = []
 
-    #list of actors, leave no duplicates
+    #will be 0 or 1, 0 if computer, 1 if human
     classes = []
 
     #document tuple

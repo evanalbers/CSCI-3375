@@ -235,8 +235,6 @@ def main():
 
     db.popTermFromHuman()
 
-    #print(db.TERMINAL_MAP)
-
     runGA(100, 10)
 
     savePerformanceToJson(GEN_DELTAS)

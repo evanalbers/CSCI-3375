@@ -8,7 +8,7 @@ bard.py generates a limerick with no input from the user. It contains the
 body of limerick generating code, including the basic framework of 
 recursive limerick generation, as well as saving limericks to files,
 and the demo code that generates a limerick using the top performing 
-markov matrix, and plays it outloud for the user.
+markov matrix, and plays it out loud for the user.
 
 """
 import numpy as np
