@@ -406,14 +406,14 @@ def saveToFile(lim_list):
     None
     """
 
-    with open("lim_data.json", 'r') as f:
+    with open("Training Data/lim_data.json", 'r') as f:
 
         #dict containing list of lims
         mega_dict = json.load(f)
     
     mega_dict['0'] = lim_list
 
-    with open("lim_data.json", 'w') as f:
+    with open("Training Data/lim_data.json", 'w') as f:
         json.dump(mega_dict, f)
 
 
@@ -466,7 +466,7 @@ def trainModel(filename):
 
     stemmer = LancasterStemmer()
 
-    raw = db.get_raw_training_data("lim_data.json")
+    raw = db.get_raw_training_data("Training Data/lim_data.json")
     words, classes, documents = db.organize_raw_training_data(raw, stemmer)
     training_data, output = db.create_training_data(words, classes, documents)
 
@@ -488,9 +488,9 @@ def bard_demo():
     Simply generates a limerick with top survivor, reads the limerick out loud,
     and saves it to a file.
     """
-
+    
     #choose top survivor
-    with open("survivors.json", 'r') as f:
+    with open(" Optimization and Model Data/survivors.json", 'r') as f:
         survivors = json.load(f)
     top = max(list(survivors.keys()))
     bestMM = survivors[top]

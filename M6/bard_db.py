@@ -1,6 +1,5 @@
 import numpy as np
 import nltk
-from nltk.corpus import brown
 import json
 from os.path import exists
 from nltk.tokenize import word_tokenize
@@ -11,7 +10,6 @@ TAG_LIST = []
 TERMINAL_MAP = {}
 
 def getHumanLims():
-
     """gets a list of human limericks from default dataset 
     
     Parameters
@@ -49,8 +47,7 @@ def getHumanLims():
 
     return human_lims
 
-def populateTermMap(corpus):
-
+def populateTermMap(corpus, corpus_name):
     """ populates the TERMINAL_MAP from a given corpus
     
     Parameters
@@ -88,12 +85,11 @@ def populateTermMap(corpus):
                     TAG_LIST.append(t[1])
     
     #save to file
-    with open("human_term_map.json", "w") as f:
+    with open("Terminal Map/" + corpus_name, "w") as f:
         json.dump(TERMINAL_MAP, f)
     
 
 def popTermFromHuman():
-
     """populates terminal map from human limerick database
     
     Parameters
@@ -115,8 +111,8 @@ def popTermFromHuman():
     global TAG_LIST
 
     #if it already exists, use it to avoid long load time
-    if exists("human_term_map.json"):
-        with open("human_term_map.json", "r") as f:
+    if exists("Terminal Maps/default.json"):
+        with open("Terminal Maps/default.json", "r") as f:
             TERMINAL_MAP = json.load(f)
 
             #only initialize if it isn't empty, otherwise should populate it
@@ -129,6 +125,9 @@ def popTermFromHuman():
 
     populateTermMap(human_lims)
 
+#def assemble_training_data(filename):
+
+
 
 def get_raw_training_data(filename):
     """Open a JSON file and extract its data into a list of dictionaries.
@@ -138,7 +137,8 @@ def get_raw_training_data(filename):
         training_data: List of dictionaries of dialogue
     """
 
-    with open(filename, "r") as f:
+    with open("Training Data/" + filename, "r") as f:
+
         training_data = []
 
         file_data = json.load(f)
@@ -165,13 +165,18 @@ def get_raw_training_data(filename):
     return training_data
 
 def preprocess_words(words, stemmer):
-    """Takes in list of words, stems each, and returns a no-duplicates \
-        list.
-    Parameters: 
-        words: The full spoken words from the dialogue
-        stemmer: Stems words 
-    Returns:
-        stemmed_words: The list of stemmed words
+    """ Takes in list of words, stems each, and returns a no-duplicates list.
+    Parameters
+    --------
+        words : list
+            all words in the data
+        stemmer : stemmer
+            stems words
+
+    Returns
+    --------
+        stemmed_words : list
+            The list of stemmed words
     """
 
     stemmed_words = []
@@ -184,8 +189,6 @@ def preprocess_words(words, stemmer):
                 stemmed_word = stemmer.stem(word)
                 stemmed_words.append(stemmed_word)
     
-    # Weird! This changes the training output!
-    # stemmed_words = list(set(stemmed_words))
     stemmed_words = [i for n, i in enumerate(stemmed_words) \
         if i not in stemmed_words[:n]]
     

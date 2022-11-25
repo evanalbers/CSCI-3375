@@ -93,7 +93,7 @@ def save_synapses(filename, words, classes, synapse_0, synapse_1):
                'words': words,
                'classes': classes
               }
-    synapse_file = "synapses.json"
+    synapse_file = "Optimization and Model Data/synapses.json"
 
     with open(synapse_file, 'w') as outfile:
         json.dump(synapse, outfile, indent=4, sort_keys=True)
@@ -110,7 +110,7 @@ def train(X, y, words, classes, hidden_neurons=10, alpha=1, epochs=50000):
     synapse_0, synapse_1 = get_synapses(epochs, X, y, alpha, synapse_0, synapse_1)
 
     # Save our work
-    save_synapses("synapses.json", words, classes, synapse_0, synapse_1)
+    save_synapses("Optimization and Model Data/synapses.json", words, classes, synapse_0, synapse_1)
 
 
 def start_training(words, classes, training_data, output):
@@ -148,7 +148,7 @@ def get_output_layer(words, sentence):
     our bag of words for the new sentence to classify."""
 
     # Load calculated weights.
-    synapse_file = 'synapses.json'
+    synapse_file = 'Optimization and Model Data/synapses.json'
     with open(synapse_file) as data_file:
         synapse = json.load(data_file)
         synapse_0 = np.asarray(synapse['synapse0'])
