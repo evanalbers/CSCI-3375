@@ -60,11 +60,9 @@ def evaluateModel(n, model):
 
     lims = []
 
-    b.initializeMarkovMatrices(givenMM=model)
-
     for num in range(n):
 
-        lim = b.genLimerick()
+        lim = b.genLimerick(model)
         if lim != False:
             lims.append(lim)
 
@@ -219,8 +217,8 @@ def runGA(m, n):
             with open("Training Data/human_lims.json", "r") as f:
                 num_human_lim = len(json.load(f)["1"])
 
-            b.genData(num_human_lim, top_x[top])
-            b.trainModel()
+            db.genData(num_human_lim, top_x[top])
+            bt.trainModel()
 
 def savePerformanceToJson(deltas):
 
@@ -238,9 +236,19 @@ def main():
 
     db.popTermFromHuman()
 
-    runGA(100, 10)
+    #runGA(100, 10)
 
-    savePerformanceToJson(GEN_DELTAS)
+    db.assemble_default_human_lims()
+    with open(" Optimization and Model Data/survivors.json", 'r') as f:
+        survivors = json.load(f)
+    top = max(list(survivors.keys()))
+    bestMM = survivors[top]
+
+    with open("Training Data/human_lims.json", "r") as f:
+        length = len(json.load(f)["1"])
+    db.genData(10, bestMM)
+
+    #savePerformanceToJson(GEN_DELTAS)
 
     return 0
 

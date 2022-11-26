@@ -18,6 +18,7 @@ import json
 from nltk.stem.lancaster import LancasterStemmer
 import bard_trainer as bt
 import gtts as tts
+import copy
 
 
 MARKOV_MATRICIES = {}
@@ -61,7 +62,9 @@ def initializeMarkovMatrices(key=0, filename="", givenMM={}):
 
     #if MM given, initialize to those values
     if givenMM != {}:
-        MARKOV_MATRICES = givenMM
+        MARKOV_MATRICES = copy.deepcopy(givenMM)
+        print(MARKOV_MATRICES)
+        return
 
     #otherwise, if none of the optional param are given, initialize all
     #values to equal
@@ -279,11 +282,14 @@ def readjustWeights(tag, tag_list, weights):
     return weights, tag_list
 
 
-def generateLine(tag, num_feet, syllables, rhyme=False):
+def generateLine(givenMM, tag, num_feet, syllables, rhyme=False):
     """ markov descent parser that generates a line with given meter and stress
 
     Parameters
     --------
+    givenMM : dict
+        MM to generate limerick with
+
     tag : string
         chosen tag for this stage in the line
 
@@ -306,17 +312,21 @@ def generateLine(tag, num_feet, syllables, rhyme=False):
         again same as glPostRecursion, the line generated thus far by the call
     """ 
 
-    global MARKOV_MATRICIES
+    print(givenMM)
 
     #make a copy of the tag list
     tags = db.TAG_LIST[:]
+    print(tags)
 
+    print(tag)
     #make a copy of the MM
-    weights = MARKOV_MATRICIES[tags.index(tag)][:]
+    weights = givenMM[str(tags.index(tag))][:]
 
     #choose a tag according to the MM
     index = np.random.choice(len(tags), p=weights)
     next_tag = tags[index]
+    print(tags)
+    print(next_tag)
 
     #if no more syllables, we have reached the base case
     if syllables == 0:
@@ -325,7 +335,7 @@ def generateLine(tag, num_feet, syllables, rhyme=False):
 
     else: 
 
-        remaining_meter, line = generateLine(next_tag, num_feet, 
+        remaining_meter, line = generateLine(givenMM, next_tag, num_feet, 
                                             syllables-1, rhyme)
         #if chooseTerminal fails at some point, retry 
         while line == False:
@@ -344,18 +354,19 @@ def generateLine(tag, num_feet, syllables, rhyme=False):
             index = np.random.choice(len(tags), p=weights)
             next_tag = tags[index]
 
-            remaining_meter, line = generateLine(next_tag, num_feet, 
+            remaining_meter, line = generateLine(givenMM, next_tag, num_feet, 
                                                 syllables-1, rhyme)
         #run post recursion (ie, choosing terminal symbol, and other bits)
         #and return
         return glPostRecursion(tag, remaining_meter, line)
 
-def genLimerick():
+def genLimerick(givenMM):
     """ generates a limerick 
     
     Parameters
     --------
-    None
+    givenMM : dict
+        MM to generate limerick with
 
     Returns
     --------
@@ -366,109 +377,32 @@ def genLimerick():
     return false and ditch it, so that's what it does. Retrying is expensive
     """
 
-    line_one = generateLine(np.random.choice(db.TAG_LIST), 3, 9)[1]
+    line_one = generateLine(givenMM, np.random.choice(db.TAG_LIST), 3, 9)[1]
 
     if line_one == False:
         return False
 
-    line_two = generateLine(np.random.choice(db.TAG_LIST), 3, 9, line_one.split()[-1])[1]
+    line_two = generateLine(givenMM, np.random.choice(db.TAG_LIST), 3, 9, line_one.split()[-1])[1]
 
     if line_two == False:
         return False
 
-    line_three = generateLine(np.random.choice(db.TAG_LIST), 2, 6)[1]
+    line_three = generateLine(givenMM, np.random.choice(db.TAG_LIST), 2, 6)[1]
 
     if line_three == False:
         return False
 
-    line_four = generateLine(np.random.choice(db.TAG_LIST), 2, 6, line_three.split()[-1])[1]
+    line_four = generateLine(givenMM, np.random.choice(db.TAG_LIST), 2, 6, line_three.split()[-1])[1]
 
     if line_four == False:
         return False
 
-    line_five = generateLine(np.random.choice(db.TAG_LIST), 3, 9, line_one.split()[-1])[1]
+    line_five = generateLine(givenMM, np.random.choice(db.TAG_LIST), 3, 9, line_one.split()[-1])[1]
 
     if line_five == False:
         return False
 
     return line_one + '\n' + line_two + '\n' + line_three + '\n' + line_four + '\n' + line_five
-
-def saveToFile(lim_list):
-    """ used to save some given text to json file
-    
-    Parameters
-    --------
-    lim_list : list
-        list of limericks to save to file
-    
-    Returns
-    --------
-    None
-    """
-
-    mega_dict = {}
-    
-    mega_dict['0'] = lim_list
-
-    with open("Training Data/lim_data.json", 'w') as f:
-        json.dump(mega_dict, f)
-
-
-def genData(n, givenMM=''): 
-    """ used to generate n limericks from bard, save them to lim_data.json
-    
-    Parameters
-    --------
-    n : int
-        number of limericks we want some MM to generate
-
-    givenMM : dict, optional
-        if given, a MM we want to use to generate the n limericks
-
-    Returns
-    --------
-    None
-    """
-
-    if givenMM != '':
-        MARKOV_MATRICIES = givenMM
-    
-    lim_list = []
-
-    #generate a limerick, add to lim_list
-    for num in range(n):
-
-        lim = genLimerick()
-        if lim != False:
-            lim_list.append(lim)
-    
-    saveToFile(lim_list)
-
-
-def trainModel(): 
-    """ train the model on some given fileset
-     
-    Parameters
-    --------
-    filename : string
-        string representing a json filename that contains the limericks
-        to train the classifier on
-    
-    Returns
-    --------
-    None
-      
-    Note: classifier information (synapses) are saved to a file
-    """
-
-    stemmer = LancasterStemmer()
-
-    raw = db.get_raw_training_data()
-    words, classes, documents = db.organize_raw_training_data(raw, stemmer)
-    training_data, output = db.create_training_data(words, classes, documents)
-
-    bt.start_training(words, classes, training_data, output)
-
 
 def bard_demo():
 
@@ -492,16 +426,13 @@ def bard_demo():
     top = max(list(survivors.keys()))
     bestMM = survivors[top]
 
-    #init MM with top survivor
-    initializeMarkovMatrices(givenMM=bestMM)
-
     with open("demo_lims.json", "r") as f:
         lims = json.load(f)
 
     #gen a limerick
     new_lim = False
     while new_lim == False:
-        new_lim = genLimerick()
+        new_lim = genLimerick(bestMM)
 
     #generate audio file of limerick being read, save and read file
     spch = tts.gTTS(text=new_lim, lang='en')
@@ -518,12 +449,6 @@ def bard_demo():
     #save lim to file
     with open("demo_lims.json", "w") as f:
         json.dump(lims, f)
-
-
-# def printProdRules():
-
-#     for t in db.TAG_LIST:
-#         for tag in db.TAG_LIST:
 
 
 def main():

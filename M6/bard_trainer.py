@@ -175,22 +175,27 @@ def classify(words, classes, sentence):
     print("\nSentence to classify: {0}\nClassification: {1}".format(sentence, return_results))
     return return_results
 
+def trainModel(): 
+    """ train the model on some given fileset
+     
+    Parameters
+    --------
+    filename : string
+        string representing a json filename that contains the limericks
+        to train the classifier on
+    
+    Returns
+    --------
+    None
+      
+    Note: classifier information (synapses) are saved to a file
+    """
 
-def main():
     stemmer = LancasterStemmer()
 
-    raw = db.get_raw_training_data("dialogue_data.csv")
+    raw = db.get_raw_training_data()
     words, classes, documents = db.organize_raw_training_data(raw, stemmer)
     training_data, output = db.create_training_data(words, classes, documents)
 
-    # Comment this out if you have already trained once and don't want to re-train.
     start_training(words, classes, training_data, output)
 
-    # Classify new sentences.
-    classify(words, classes, "will you look into the mirror?")
-    classify(words, classes, "mithril, as light as a feather, and as hard as dragon scales.")
-    classify(words, classes, "the thieves!")
-
-
-if __name__ == "__main__":
-    main()

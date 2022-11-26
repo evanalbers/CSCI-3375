@@ -1,11 +1,10 @@
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<BARD.PY>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 Welcome to Bard, a computationally creative poetry generator! Bard will
-generate poems at your request, and even read them aloud to you. You can 
-submit your own corpus that you would like Bard to draw from, or simply 
-rely on the default settings to generate poems. 
+generate poems at your request, and even read them aloud to you. 
 
 List of commands:
 
  - generate (g) -> Bard generates a new limerick
  - play (p) -> Bard reads the most recently generated limerick out loud
  - train bard (tb [generations] [models per generation]) -> Train Bard starting at the most recent generation
+ - quit (q) -> quits program

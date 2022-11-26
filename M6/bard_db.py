@@ -4,10 +4,46 @@ import json
 from os.path import exists
 from nltk.tokenize import word_tokenize
 import string
+import bard as b
 
 TAG_LIST = []
 
 TERMINAL_MAP = {}
+
+def genData(n, givenMM): 
+    """ used to generate n limericks from bard, save them to lim_data.json
+    
+    Parameters
+    --------
+    n : int
+        number of limericks we want some MM to generate
+
+    givenMM : dict
+        a MM we want to use to generate the n limericks
+
+    Returns
+    --------
+    None
+    """
+
+    
+    lim_list = []
+
+    num = 0
+
+    #generate a limerick, add to lim_list
+    while num < n:
+        print(TAG_LIST)
+        lim = b.genLimerick(givenMM)
+        if lim != False:
+            lim_list.append(lim)
+            num += 1
+    
+    with open("Training Data/bard_lims.json", "w") as f:
+        lim_dict = {}
+        lim_dict["0"] = lim_list
+        json.dump(lim_dict, f)
+
 
 def getHumanLims():
     """gets a list of human limericks from default dataset 
@@ -27,16 +63,10 @@ def getHumanLims():
     so it is not a general function
     """
 
-    global TERMINAL_MAP
-    global TAG_LIST
-
-    #will be resetting
-    TAG_LIST = []
-
     human_lims = []
 
     #load human written lim data set
-    with open("limerick_dataset_oedilf_v3.json", "r") as f:
+    with open("Training Data/limerick_dataset_oedilf_v3.json", "r") as f:
         lims = json.load(f)
 
     #contains some non-lim text, don't want those, get only the limericks
