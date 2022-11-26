@@ -125,11 +125,19 @@ def popTermFromHuman():
 
     populateTermMap(human_lims)
 
-#def assemble_training_data(filename):
+def assemble_default_human_lims():
+
+    human_lims = getHumanLims()
+
+    human_dict = {}
+
+    human_dict["1"] = human_lims
+
+    with open("Training Data/human_lims.json", "w") as f:
+        json.dump(human_dict, f)
 
 
-
-def get_raw_training_data(filename):
+def get_raw_training_data():
     """Open a JSON file and extract its data into a list of dictionaries.
     Parameters: 
         filename: 'dialogue_data.csv', which was given
@@ -137,30 +145,32 @@ def get_raw_training_data(filename):
         training_data: List of dictionaries of dialogue
     """
 
-    with open("Training Data/" + filename, "r") as f:
+    human = []
+    computer = []
 
-        training_data = []
+    with open("Training Data/human_lims.json", "r") as f:
+        human = json.load(f)['1']    
+    
+    with open("Training Data/bard_lims.json", "r") as f:
+        computer = json.load(f)['0']
 
-        file_data = json.load(f)
+    training_data = []
 
-        human = file_data['1']
-        computer = file_data['0']
+    for num in range(20):
+        lim = human[num]
+        lim = lim.lower()
+        mini_d = {}
+        mini_d['origin'] = '1'
+        mini_d['limerick'] = lim 
+        training_data.append(mini_d)
 
-        for num in range(20):
-            lim = human[num]
-            lim = lim.lower()
-            mini_d = {}
-            mini_d['origin'] = '1'
-            mini_d['limerick'] = lim 
-            training_data.append(mini_d)
-
-        for num in range(20):
-            lim = computer[num]
-            lim = lim.lower()
-            mini_d = {}
-            mini_d['origin'] = '0'
-            mini_d['limerick'] = lim 
-            training_data.append(mini_d)
+    for num in range(20):
+        lim = computer[num]
+        lim = lim.lower()
+        mini_d = {}
+        mini_d['origin'] = '0'
+        mini_d['limerick'] = lim 
+        training_data.append(mini_d)
     
     return training_data
 

@@ -18,7 +18,7 @@ import json
 from nltk.stem.lancaster import LancasterStemmer
 import bard_trainer as bt
 import gtts as tts
-from playsound import playsound
+
 
 MARKOV_MATRICIES = {}
 RETRY = 1
@@ -406,10 +406,7 @@ def saveToFile(lim_list):
     None
     """
 
-    with open("Training Data/lim_data.json", 'r') as f:
-
-        #dict containing list of lims
-        mega_dict = json.load(f)
+    mega_dict = {}
     
     mega_dict['0'] = lim_list
 
@@ -448,7 +445,7 @@ def genData(n, givenMM=''):
     saveToFile(lim_list)
 
 
-def trainModel(filename): 
+def trainModel(): 
     """ train the model on some given fileset
      
     Parameters
@@ -466,7 +463,7 @@ def trainModel(filename):
 
     stemmer = LancasterStemmer()
 
-    raw = db.get_raw_training_data("Training Data/lim_data.json")
+    raw = db.get_raw_training_data()
     words, classes, documents = db.organize_raw_training_data(raw, stemmer)
     training_data, output = db.create_training_data(words, classes, documents)
 
@@ -488,7 +485,7 @@ def bard_demo():
     Simply generates a limerick with top survivor, reads the limerick out loud,
     and saves it to a file.
     """
-    
+
     #choose top survivor
     with open(" Optimization and Model Data/survivors.json", 'r') as f:
         survivors = json.load(f)
@@ -509,7 +506,7 @@ def bard_demo():
     #generate audio file of limerick being read, save and read file
     spch = tts.gTTS(text=new_lim, lang='en')
     spch.save("demo.mp3")
-    playsound("demo.mp3")
+
     
     print(new_lim)
 

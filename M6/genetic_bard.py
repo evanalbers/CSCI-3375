@@ -163,7 +163,7 @@ def genGeneration(first_gen, n):
     else: 
         #handle survivors
         survivors = {}
-        with open("Optimization and Model Data/survivors.json", 'r') as f:
+        with open(" Optimization and Model Data/survivors.json", 'r') as f:
             survivors = json.load(f)
         for model in list(survivors.keys()):
             markovs.append(survivors[model])
@@ -178,14 +178,14 @@ def runGeneration(first_gen, n):
 
     gen = genGeneration(first_gen, n)
 
-    with open('Optimization and Model Data/current_gen.json', 'w') as f:
+    with open(' Optimization and Model Data/current_gen.json', 'w') as f:
         empty = {}
         json.dump(empty, f)
 
     for num in range(n):
         delta_avg = evaluateModel(NUM_EVAL, gen[num])
 
-    with open('Optimization and Model Data/survivors.json', "w") as f:
+    with open(' Optimization and Model Data/survivors.json', "w") as f:
         empty = {}
         json.dump(empty, f)
 
@@ -204,7 +204,7 @@ def runGA(m, n):
         delta_avg = runGeneration((num == 0), n)
 
         top_x = {}
-        with open("Optimization and Model Data/survivors.json", "r") as f:
+        with open(" Optimization and Model Data/survivors.json", "r") as f:
             top_x = json.load(f)
         top = max(list(top_x.keys()))
 
@@ -215,12 +215,16 @@ def runGA(m, n):
 
         if float(1-float(top)) < 0.5:
             print('RETRAINING CLASSIFER')
-            b.genData(50, top_x[top])
-            b.trainModel("Training Data/lim_data.json")
+
+            with open("Training Data/human_lims.json", "r") as f:
+                num_human_lim = len(json.load(f)["1"])
+
+            b.genData(num_human_lim, top_x[top])
+            b.trainModel()
 
 def savePerformanceToJson(deltas):
 
-    with open("Optimization and Model Data/genetic_bard.json", "w") as f:
+    with open(" Optimization and Model Data/genetic_bard_performance.json", "w") as f:
         perf_dict = {}
         for num in range(len(deltas)):  
             perf_dict[num] = deltas[num]
